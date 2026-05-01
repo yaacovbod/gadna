@@ -278,6 +278,48 @@
       color: #1A2410;
     }
 
+    /* ── Mobile ── */
+    button, .choice-opt .lbl {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 480px) {
+      .two-col { grid-template-columns: 1fr; }
+
+      .container { padding: 14px 10px 48px; }
+
+      .header { margin-bottom: 18px; }
+      .header h1 { font-size: 24px; }
+      .header-badge { padding: 6px 14px; }
+      .header-badge span { font-size: 11px; letter-spacing: 1px; }
+      .header p { font-size: 12px; }
+
+      .progress-wrap { margin-bottom: 16px; }
+
+      .step { padding: 18px 14px; border-radius: 10px; }
+      .step-title { font-size: 15px; margin-bottom: 18px; padding-bottom: 12px; }
+
+      .form-group { margin-bottom: 20px; }
+      .question { font-size: 14px; margin-bottom: 10px; }
+
+      input[type="text"], textarea, select { font-size: 16px; padding: 11px 12px; }
+
+      .rating-row { gap: 6px; }
+      .rating-btn { height: 54px; font-size: 18px; border-radius: 6px; min-width: 0; }
+      .rating-hints { font-size: 11px; }
+
+      .choice-group { gap: 8px; }
+      .choice-opt .lbl { padding: 12px 18px; font-size: 15px; min-height: 44px; display: flex; align-items: center; }
+
+      .nav { gap: 8px; margin-top: 16px; }
+      .btn { padding: 15px; font-size: 16px; }
+
+      .success { padding: 40px 16px; }
+      .success .ico { font-size: 56px; }
+      .success h2 { font-size: 22px; }
+    }
+
     /* ── Conditional field ── */
     .cond { display: none; margin-top: 12px; }
     .cond.show { display: block; }
