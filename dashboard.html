@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>גדנ"ע — דשבורד תוצאות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:     #2D3B1F;
+      --card:   #34451F;
+      --card2:  #3D4F2A;
+      --accent: #8B7355;
+      --green:  #6B8C3E;
+      --text:   #F0EDD8;
+      --muted:  #B8B49A;
+      --border: #5C6B3A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 65% 45% at 12% 22%, #3D4F2A 0%, transparent 60%),
+        radial-gradient(ellipse 48% 58% at 88% 12%, #4A5235 0%, transparent 55%),
+        radial-gradient(ellipse 72% 48% at 52% 72%, #3B4A25 0%, transparent 52%),
+        radial-gradient(ellipse 38% 68% at 4%  88%, #2A3518 0%, transparent 48%),
+        radial-gradient(ellipse 55% 42% at 96% 78%, #4D4025 0%, transparent 50%),
+        radial-gradient(ellipse 42% 52% at 44% 38%, #3A4820 0%, transparent 42%),
+        radial-gradient(ellipse 58% 28% at 28% 68%, #2E3D1A 0%, transparent 48%);
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+    }
+
+    /* ── Header ── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .top-bar h1 {
+      font-size: 26px;
+      font-weight: 900;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .top-bar h1 span { color: var(--accent); }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    select, button {
+      font-family: 'Heebo', sans-serif;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 9px 16px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    select {
+      background: rgba(0,0,0,0.3);
+      color: var(--text);
+      direction: rtl;
+    }
+    select option { background: #2D3B1F; }
+
+    .btn-refresh {
+      background: var(--accent);
+      color: #1A2410;
+      font-weight: 700;
+      border-color: var(--accent);
+      transition: background 0.18s;
+    }
+    .btn-refresh:hover { background: #9B8360; }
+
+    /* ── Stat cards row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: rgba(52,69,31,0.88);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .stat-card .num {
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-card .lbl {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── Charts grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .chart-card {
+      background: rgba(52,69,31,0.88);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 18px;
+      backdrop-filter: blur(4px);
+    }
+
+    .chart-card.wide { grid-column: 1 / -1; }
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chart-avg {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .chart-avg strong { color: var(--green); font-size: 16px; }
+
+    canvas { max-height: 220px; }
+
+    /* ── Text answers ── */
+    .text-list {
+      max-height: 280px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-left: 4px;
+    }
+
+    .text-list::-webkit-scrollbar { width: 4px; }
+    .text-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .text-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .text-item {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .text-item .meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    /* ── Loading / empty ── */
+    .status-msg {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px;
+      font-size: 16px;
+    }
+
+    .section-head {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin: 28px 0 14px;
+    }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="top-bar">
+    <h1>גדנ"ע — <span>דשבורד תוצאות</span></h1>
+    <div class="controls">
+      <select id="classFilter" onchange="applyFilter()">
+        <option value="">כל הכיתות</option>
+        <option>יא1</option><option>יא2</option><option>יא3</option>
+        <option>יא4</option><option>יא5</option><option>יא6</option>
+      </select>
+      <button class="btn-refresh" onclick="loadData()">רענן נתונים</button>
+    </div>
+  </div>
+
+  <div id="statusMsg" class="status-msg">טוען נתונים...</div>
+
+  <div id="dashboard" style="display:none">
+
+    <!-- Stat cards -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- Rating charts -->
+    <div class="section-head">שאלות דירוג</div>
+    <div class="grid" id="ratingGrid"></div>
+
+    <!-- Choice charts -->
+    <div class="section-head">שאלות בחירה</div>
+    <div class="grid" id="choiceGrid"></div>
+
+    <!-- Text answers -->
+    <div class="section-head">תשובות פתוחות</div>
+    <div class="grid" id="textGrid"></div>
+
+  </div>
+</div>
+
+<script>
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFDlBHn07-bzcBGhok5pVsrFsQcvwspYEf8DF8toXFzog-qhkerIbNc361-Xij3W2VAg/exec';
+
+  /* Column indices (row[0] = headers) */
+  const C = {
+    timestamp:           0,
+    firstName:           1,
+    lastName:            2,
+    class:               3,
+    overallExperience:   4,
+    militaryReadiness:   5,
+    commandAttitude:     6,
+    disciplineAdequate:  7,
+    lessonFromCommander: 8,
+    favoriteActivity:    9,
+    theoreticalContent:  10,
+    mainDifficulty:      11,
+    foodRating:          12,
+    housingRating:       13,
+    personalNeeds:       14,
+    personalNeedsDetails:15,
+    cohesionRating:      16,
+    newFriends:          17,
+    scheduleChanges:     18,
+    recommendRating:     19,
+    messageForNext:      20,
+  };
+
+  const RATING_FIELDS = [
+    { key: 'overallExperience',  label: 'חוויה כללית מהגדנ"ע' },
+    { key: 'militaryReadiness',  label: 'תרומה למוכנות לשירות' },
+    { key: 'theoreticalContent', label: 'עניין התכנים העיוניים' },
+    { key: 'foodRating',         label: 'דירוג האוכל' },
+    { key: 'housingRating',      label: 'דירוג מגורים והיגיינה' },
+    { key: 'cohesionRating',     label: 'גיבוש כיתה/שכבה' },
+    { key: 'recommendRating',    label: 'המלצה לתלמידים הבאים' },
+  ];
+
+  const CHOICE_FIELDS = [
+    { key: 'commandAttitude',    label: 'יחס סגל הפיקוד',            opts: ['מצוין','טוב','טעון שיפור','גרוע'] },
+    { key: 'disciplineAdequate', label: 'משמעת מותאמת למסגרת',       opts: ['כן','לא'] },
+    { key: 'personalNeeds',      label: 'מענה לצרכים אישיים/רפואיים', opts: ['כן','לא'] },
+    { key: 'newFriends',         label: 'התקרבות לחברים חדשים',       opts: ['כן','לא'] },
+  ];
+
+  const TEXT_FIELDS = [
+    { key: 'lessonFromCommander', label: 'למידה מהמפקד/ת' },
+    { key: 'favoriteActivity',    label: 'פעילות מועדפת' },
+    { key: 'mainDifficulty',      label: 'קושי מרכזי בשבוע' },
+    { key: 'scheduleChanges',     label: 'שינויים מוצעים' },
+    { key: 'messageForNext',      label: 'מסר לתלמידים הבאים' },
+  ];
+
+  const PALETTE = ['#6B8C3E','#8B7355','#5C8A6E','#A0845C','#4E7A5A','#9E7040','#3D6B5C'];
+  const PALETTE4 = ['#6B8C3E','#8B7355','#C0392B','#4E6A3A'];
+
+  let allRows = [];
+  let charts  = {};
+
+  function loadData() {
+    document.getElementById('statusMsg').textContent = 'טוען נתונים...';
+    document.getElementById('statusMsg').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+
+    const cb = '_gadnaCb_' + Date.now();
+    window[cb] = function(data) {
+      allRows = data.slice(1).filter(r => r[C.firstName]);
+      delete window[cb];
+      applyFilter();
+    };
+
+    const s = document.createElement('script');
+    s.src = APPS_SCRIPT_URL + '?callback=' + cb;
+    s.onerror = function() {
+      document.getElementById('statusMsg').textContent =
+        'שגיאה בטעינה. וודא/י שה-URL מוגדר ושה-Web App פרוס.';
+    };
+    document.head.appendChild(s);
+    setTimeout(() => s.remove && s.remove(), 10000);
+  }
+
+  function applyFilter() {
+    const cls = document.getElementById('classFilter').value;
+    const rows = cls ? allRows.filter(r => r[C.class] === cls) : allRows;
+    render(rows);
+  }
+
+  function render(rows) {
+    if (!rows.length) {
+      document.getElementById('statusMsg').textContent = 'אין נתונים להצגה.';
+      document.getElementById('statusMsg').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('statusMsg').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    renderStats(rows);
+    renderRatings(rows);
+    renderChoices(rows);
+    renderTexts(rows);
+  }
+
+  /* ── Stats ── */
+  function renderStats(rows) {
+    const avgs = RATING_FIELDS.map(f => avg(rows, C[f.key]));
+    const overall = (avgs.reduce((a,b) => a+b, 0) / avgs.length).toFixed(1);
+
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="num">${rows.length}</div><div class="lbl">סה"כ תגובות</div></div>
+      <div class="stat-card"><div class="num">${overall}</div><div class="lbl">ממוצע כללי (1–5)</div></div>
+      <div class="stat-card"><div class="num">${avg(rows, C.overallExperience).toFixed(1)}</div><div class="lbl">חוויה כללית</div></div>
+      <div class="stat-card"><div class="num">${avg(rows, C.recommendRating).toFixed(1)}</div><div class="lbl">המלצה לשנה הבאה</div></div>
+      <div class="stat-card"><div class="num">${pct(rows, C.newFriends, 'כן')}%</div><div class="lbl">הכירו חברים חדשים</div></div>
+    `;
+  }
+
+  /* ── Rating charts ── */
+  function renderRatings(rows) {
+    const grid = document.getElementById('ratingGrid');
+    grid.innerHTML = '';
+
+    RATING_FIELDS.forEach((f, i) => {
+      const id = 'rc_' + f.key;
+      const dist = [1,2,3,4,5].map(v => rows.filter(r => +r[C[f.key]] === v).length);
+      const a = avg(rows, C[f.key]);
+
+      const card = document.createElement('div');
+      card.className = 'chart-card';
+      card.innerHTML = `
+        <div class="chart-title">${f.label}</div>
+        <div class="chart-avg">ממוצע: <strong>${a.toFixed(1)}</strong> / 5</div>
+        <canvas id="${id}"></canvas>
+      `;
+      grid.appendChild(card);
+
+      destroyChart(id);
+      charts[id] = new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+          labels: ['1','2','3','4','5'],
+          datasets: [{ data: dist, backgroundColor: PALETTE[i % PALETTE.length] + 'CC', borderColor: PALETTE[i % PALETTE.length], borderWidth: 1.5, borderRadius: 4 }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { color: '#B8B49A', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+            x: { ticks: { color: '#B8B49A' }, grid: { display: false } }
+          }
+        }
+      });
+    });
+  }
+
+  /* ── Choice charts ── */
+  function renderChoices(rows) {
+    const grid = document.getElementById('choiceGrid');
+    grid.innerHTML = '';
+
+    CHOICE_FIELDS.forEach((f, i) => {
+      const id = 'cc_' + f.key;
+      const counts = f.opts.map(o => rows.filter(r => r[C[f.key]] === o).length);
+
+      const card = document.createElement('div');
+      card.className = 'chart-card';
+      card.innerHTML = `
+        <div class="chart-title">${f.label}</div>
+        <canvas id="${id}"></canvas>
+      `;
+      grid.appendChild(card);
+
+      destroyChart(id);
+      charts[id] = new Chart(document.getElementById(id), {
+        type: 'doughnut',
+        data: {
+          labels: f.opts,
+          datasets: [{ data: counts, backgroundColor: PALETTE4.slice(0, f.opts.length).map(c => c + 'DD'), borderColor: '#2D3B1F', borderWidth: 2 }]
+        },
+        options: {
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#B8B49A', padding: 14, font: { family: 'Heebo', size: 13 } } }
+          }
+        }
+      });
+    });
+  }
+
+  /* ── Text answers ── */
+  function renderTexts(rows) {
+    const grid = document.getElementById('textGrid');
+    grid.innerHTML = '';
+
+    TEXT_FIELDS.forEach(f => {
+      const answers = rows
+        .filter(r => r[C[f.key]] && String(r[C[f.key]]).trim())
+        .map(r => ({ name: r[C.firstName] + ' ' + r[C.lastName], cls: r[C.class], text: r[C[f.key]] }));
+
+      if (!answers.length) return;
+
+      const items = answers.map(a => `
+        <div class="text-item">
+          <div class="meta">${a.name} | ${a.cls}</div>
+          ${esc(a.text)}
+        </div>
+      `).join('');
+
+      const card = document.createElement('div');
+      card.className = 'chart-card wide';
+      card.innerHTML = `
+        <div class="chart-title">${f.label} (${answers.length} תגובות)</div>
+        <div class="text-list">${items}</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  /* ── Helpers ── */
+  function avg(rows, col) {
+    const vals = rows.map(r => +r[col]).filter(v => v > 0);
+    return vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : 0;
+  }
+
+  function pct(rows, col, val) {
+    const n = rows.filter(r => r[col] === val).length;
+    return rows.length ? Math.round(n / rows.length * 100) : 0;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function destroyChart(id) {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  }
+
+  loadData();
+</script>
+
+</body>
+</html>

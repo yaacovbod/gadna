@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>גדנ"ע — שאלון משוב</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #2D3B1F;
+      --card:      #3D4F2A;
+      --card2:     #34451F;
+      --accent:    #8B7355;
+      --green:     #6B8C3E;
+      --text:      #F0EDD8;
+      --muted:     #B8B49A;
+      --border:    #5C6B3A;
+      --danger:    #C0392B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+      position: relative;
+    }
+
+    /* ── Camouflage background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 65% 45% at 12% 22%, #3D4F2A 0%, transparent 60%),
+        radial-gradient(ellipse 48% 58% at 88% 12%, #4A5235 0%, transparent 55%),
+        radial-gradient(ellipse 72% 48% at 52% 72%, #3B4A25 0%, transparent 52%),
+        radial-gradient(ellipse 38% 68% at 4%  88%, #2A3518 0%, transparent 48%),
+        radial-gradient(ellipse 55% 42% at 96% 78%, #4D4025 0%, transparent 50%),
+        radial-gradient(ellipse 42% 52% at 44% 38%, #3A4820 0%, transparent 42%),
+        radial-gradient(ellipse 33% 38% at 72% 33%, #5C5030 0%, transparent 44%),
+        radial-gradient(ellipse 58% 28% at 28% 68%, #2E3D1A 0%, transparent 48%),
+        radial-gradient(ellipse 40% 50% at 60% 15%, #444E28 0%, transparent 45%),
+        radial-gradient(ellipse 50% 35% at 80% 55%, #3C3820 0%, transparent 40%);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.35);
+      border: 2px solid var(--accent);
+      border-radius: 50px;
+      padding: 8px 20px;
+      margin-bottom: 14px;
+    }
+
+    .header-badge .star { font-size: 20px; }
+
+    .header-badge span {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .header h1 {
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--text);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── Progress ── */
+    .progress-wrap {
+      margin-bottom: 24px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .progress-track {
+      height: 6px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #8BAE50);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Step card ── */
+    .step {
+      display: none;
+      background: rgba(52, 69, 31, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 30px 26px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 32px rgba(0,0,0,0.45);
+    }
+
+    .step.active { display: block; }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--accent);
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 26px;
+    }
+
+    .step-num {
+      width: 30px;
+      height: 30px;
+      background: var(--accent);
+      color: #1A2410;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    /* ── Form groups ── */
+    .form-group { margin-bottom: 26px; }
+    .form-group:last-child { margin-bottom: 0; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 480px) { .two-col { grid-template-columns: 1fr; } }
+
+    .question {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .question .req  { color: #E57373; margin-right: 3px; }
+    .question .opt  { font-size: 12px; font-weight: 400; color: var(--muted); margin-right: 6px; }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      font-size: 15px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      direction: rtl;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(107,140,62,0.2);
+    }
+
+    textarea { resize: vertical; min-height: 88px; }
+
+    select option { background: #2D3B1F; color: var(--text); }
+
+    /* ── Rating buttons ── */
+    .rating-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .rating-btn {
+      flex: 1;
+      height: 56px;
+      background: rgba(0,0,0,0.25);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: 'Heebo', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .rating-btn:hover { border-color: var(--green); color: var(--text); }
+
+    .rating-btn.sel {
+      background: var(--green);
+      border-color: var(--green);
+      color: #1A2410;
+      box-shadow: 0 2px 14px rgba(107,140,62,0.4);
+    }
+
+    .rating-hints {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 7px;
+    }
+
+    /* ── Radio / choice buttons ── */
+    .choice-group { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .choice-opt input[type="radio"] { display: none; }
+
+    .choice-opt .lbl {
+      display: inline-block;
+      padding: 10px 22px;
+      background: rgba(0,0,0,0.25);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      user-select: none;
+    }
+
+    .choice-opt .lbl:hover { border-color: var(--green); color: var(--text); }
+
+    .choice-opt input[type="radio"]:checked + .lbl {
+      background: var(--green);
+      border-color: var(--green);
+      color: #1A2410;
+    }
+
+    /* ── Conditional field ── */
+    .cond { display: none; margin-top: 12px; }
+    .cond.show { display: block; }
+
+    /* ── Error ── */
+    .err-msg {
+      background: rgba(192,57,43,0.15);
+      border: 1px solid rgba(192,57,43,0.5);
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: #E57373;
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+    .err-msg.show { display: block; }
+
+    /* ── Navigation ── */
+    .nav {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.18s;
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-prev {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-prev:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+
+    .btn-next {
+      background: var(--accent);
+      color: #1A2410;
+    }
+    .btn-next:hover:not(:disabled) { background: #9B8360; transform: translateY(-1px); }
+
+    .btn-submit {
+      background: var(--green);
+      color: #1A2410;
+    }
+    .btn-submit:hover:not(:disabled) { background: #7A9E4A; transform: translateY(-1px); }
+
+    .hidden { display: none !important; }
+
+    /* ── Success screen ── */
+    .success {
+      display: none;
+      text-align: center;
+      background: rgba(52,69,31,0.88);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 56px 24px;
+      backdrop-filter: blur(6px);
+    }
+    .success.show { display: block; }
+
+    .success .ico { font-size: 70px; margin-bottom: 18px; }
+    .success h2 { font-size: 26px; font-weight: 900; margin-bottom: 8px; }
+    .success p  { color: var(--muted); font-size: 15px; }
+    .success .small { font-size: 13px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-badge">
+      <span class="star">★</span>
+      <span>גדנ&quot;ע</span>
+      <span class="star">★</span>
+    </div>
+    <h1>שאלון משוב</h1>
+    <p>שבוע הגדנ&quot;ע | כיתות יא | 2025–2026</p>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-meta">
+      <span id="stepLabel">פרטים אישיים</span>
+      <span id="stepCounter">שלב 1 מתוך 7</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:14%"></div>
+    </div>
+  </div>
+
+  <!-- Step 0: מבוא -->
+  <div class="step active" data-step="0">
+    <div class="step-title">פרטים אישיים</div>
+
+    <div class="two-col">
+      <div class="form-group">
+        <label class="question" for="firstName">שם פרטי <span class="req">*</span></label>
+        <input type="text" id="firstName" placeholder="שם פרטי">
+      </div>
+      <div class="form-group">
+        <label class="question" for="lastName">שם משפחה <span class="req">*</span></label>
+        <input type="text" id="lastName" placeholder="שם משפחה">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="question" for="classSelect">כיתה <span class="req">*</span></label>
+      <select id="classSelect">
+        <option value="">בחר/י כיתה</option>
+        <option>יא1</option><option>יא2</option><option>יא3</option>
+        <option>יא4</option><option>יא5</option><option>יא6</option>
+      </select>
+    </div>
+
+    <div class="err-msg" id="err-0">אנא מלא/י את כל השדות הנדרשים</div>
+  </div>
+
+  <!-- Step 1: שביעות רצון כללית -->
+  <div class="step" data-step="1">
+    <div class="step-title">
+      <div class="step-num">1</div>
+      שביעות רצון כללית
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        איך היית מגדיר/ה את החוויה הכללית שלך מהגדנ"ע? <span class="req">*</span>
+      </label>
+      <div class="rating-row" data-field="overallExperience">
+        <button class="rating-btn" onclick="rate(this,'overallExperience',1)">1</button>
+        <button class="rating-btn" onclick="rate(this,'overallExperience',2)">2</button>
+        <button class="rating-btn" onclick="rate(this,'overallExperience',3)">3</button>
+        <button class="rating-btn" onclick="rate(this,'overallExperience',4)">4</button>
+        <button class="rating-btn" onclick="rate(this,'overallExperience',5)">5</button>
+      </div>
+      <div class="rating-hints"><span>גרוע מאוד</span><span>מצוין</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        באיזו מידה הגדנ"ע תרמה למוכנות שלך לשירות צבאי? <span class="req">*</span>
+      </label>
+      <div class="rating-row" data-field="militaryReadiness">
+        <button class="rating-btn" onclick="rate(this,'militaryReadiness',1)">1</button>
+        <button class="rating-btn" onclick="rate(this,'militaryReadiness',2)">2</button>
+        <button class="rating-btn" onclick="rate(this,'militaryReadiness',3)">3</button>
+        <button class="rating-btn" onclick="rate(this,'militaryReadiness',4)">4</button>
+        <button class="rating-btn" onclick="rate(this,'militaryReadiness',5)">5</button>
+      </div>
+      <div class="rating-hints"><span>לא תרמה כלל</span><span>תרמה מאוד</span></div>
+    </div>
+
+    <div class="err-msg" id="err-1">אנא ענה/י על כל השאלות הנדרשות</div>
+  </div>
+
+  <!-- Step 2: המפקדים והמשמעת -->
+  <div class="step" data-step="2">
+    <div class="step-title">
+      <div class="step-num">2</div>
+      המפקדים והמשמעת
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        איך היית מגדיר/ה את היחס של סגל הפיקוד כלפי התלמידים? <span class="req">*</span>
+      </label>
+      <div class="choice-group">
+        <label class="choice-opt"><input type="radio" name="commandAttitude" value="מצוין"><span class="lbl">מצוין</span></label>
+        <label class="choice-opt"><input type="radio" name="commandAttitude" value="טוב"><span class="lbl">טוב</span></label>
+        <label class="choice-opt"><input type="radio" name="commandAttitude" value="טעון שיפור"><span class="lbl">טעון שיפור</span></label>
+        <label class="choice-opt"><input type="radio" name="commandAttitude" value="גרוע"><span class="lbl">גרוע</span></label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        האם לדעתך רמת המשמעת הייתה מותאמת למסגרת? <span class="req">*</span>
+      </label>
+      <div class="choice-group">
+        <label class="choice-opt"><input type="radio" name="disciplineAdequate" value="כן"><span class="lbl">כן</span></label>
+        <label class="choice-opt"><input type="radio" name="disciplineAdequate" value="לא"><span class="lbl">לא</span></label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        ציין/י דבר אחד שלמדת מהעבודה מול המפקד/ת שלך
+        <span class="opt">(לא חובה)</span>
+      </label>
+      <textarea id="lessonFromCommander" placeholder="..."></textarea>
+    </div>
+
+    <div class="err-msg" id="err-2">אנא ענה/י על כל השאלות הנדרשות</div>
+  </div>
+
+  <!-- Step 3: תכנים ופעילויות -->
+  <div class="step" data-step="3">
+    <div class="step-title">
+      <div class="step-num">3</div>
+      תכנים ופעילויות
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        מאיזו פעילות הכי נהנית?
+        <span class="opt">(לא חובה)</span>
+      </label>
+      <input type="text" id="favoriteActivity" placeholder="לדוגמה: גיבושון, שדאות, מסע, תורנויות...">
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        האם התכנים העיוניים (שיעורים והסברים) היו מעניינים ורלוונטיים? <span class="req">*</span>
+      </label>
+      <div class="rating-row" data-field="theoreticalContent">
+        <button class="rating-btn" onclick="rate(this,'theoreticalContent',1)">1</button>
+        <button class="rating-btn" onclick="rate(this,'theoreticalContent',2)">2</button>
+        <button class="rating-btn" onclick="rate(this,'theoreticalContent',3)">3</button>
+        <button class="rating-btn" onclick="rate(this,'theoreticalContent',4)">4</button>
+        <button class="rating-btn" onclick="rate(this,'theoreticalContent',5)">5</button>
+      </div>
+      <div class="rating-hints"><span>לא מעניין כלל</span><span>מעניין מאוד</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        מהו הקושי המרכזי איתו התמודדת במהלך השבוע?
+        <span class="opt">(לא חובה)</span>
+      </label>
+      <textarea id="mainDifficulty" placeholder="..."></textarea>
+    </div>
+
+    <div class="err-msg" id="err-3">אנא ענה/י על כל השאלות הנדרשות</div>
+  </div>
+
+  <!-- Step 4: תנאים לוגיסטיים -->
+  <div class="step" data-step="4">
+    <div class="step-title">
+      <div class="step-num">4</div>
+      תנאים לוגיסטיים
+    </div>
+
+    <div class="form-group">
+      <label class="question">דרג/י את רמת האוכל בבסיס <span class="req">*</span></label>
+      <div class="rating-row" data-field="foodRating">
+        <button class="rating-btn" onclick="rate(this,'foodRating',1)">1</button>
+        <button class="rating-btn" onclick="rate(this,'foodRating',2)">2</button>
+        <button class="rating-btn" onclick="rate(this,'foodRating',3)">3</button>
+        <button class="rating-btn" onclick="rate(this,'foodRating',4)">4</button>
+        <button class="rating-btn" onclick="rate(this,'foodRating',5)">5</button>
+      </div>
+      <div class="rating-hints"><span>גרוע מאוד</span><span>מצוין</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">דרג/י את תנאי המגורים וההיגיינה (מקלחות ושירותים) <span class="req">*</span></label>
+      <div class="rating-row" data-field="housingRating">
+        <button class="rating-btn" onclick="rate(this,'housingRating',1)">1</button>
+        <button class="rating-btn" onclick="rate(this,'housingRating',2)">2</button>
+        <button class="rating-btn" onclick="rate(this,'housingRating',3)">3</button>
+        <button class="rating-btn" onclick="rate(this,'housingRating',4)">4</button>
+        <button class="rating-btn" onclick="rate(this,'housingRating',5)">5</button>
+      </div>
+      <div class="rating-hints"><span>גרוע מאוד</span><span>מצוין</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        האם הרגשת שהיה מענה מספק לצרכים אישיים או רפואיים? <span class="req">*</span>
+      </label>
+      <div class="choice-group">
+        <label class="choice-opt">
+          <input type="radio" name="personalNeeds" value="כן" onchange="showCond('needsDetail',false)">
+          <span class="lbl">כן</span>
+        </label>
+        <label class="choice-opt">
+          <input type="radio" name="personalNeeds" value="לא" onchange="showCond('needsDetail',true)">
+          <span class="lbl">לא</span>
+        </label>
+      </div>
+      <div class="cond" id="needsDetail">
+        <textarea id="personalNeedsDetails" placeholder="פירוט (לא חובה)..."></textarea>
+      </div>
+    </div>
+
+    <div class="err-msg" id="err-4">אנא ענה/י על כל השאלות הנדרשות</div>
+  </div>
+
+  <!-- Step 5: חברה וגיבוש -->
+  <div class="step" data-step="5">
+    <div class="step-title">
+      <div class="step-num">5</div>
+      חברה וגיבוש
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        באיזו מידה הרגשת שהגדנ"ע גיבשה את הכיתה או השכבה? <span class="req">*</span>
+      </label>
+      <div class="rating-row" data-field="cohesionRating">
+        <button class="rating-btn" onclick="rate(this,'cohesionRating',1)">1</button>
+        <button class="rating-btn" onclick="rate(this,'cohesionRating',2)">2</button>
+        <button class="rating-btn" onclick="rate(this,'cohesionRating',3)">3</button>
+        <button class="rating-btn" onclick="rate(this,'cohesionRating',4)">4</button>
+        <button class="rating-btn" onclick="rate(this,'cohesionRating',5)">5</button>
+      </div>
+      <div class="rating-hints"><span>לא גיבשה כלל</span><span>גיבשה מאוד</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        האם הכרת חברים חדשים או התקרבת לחברים קיימים בעקבות החוויה? <span class="req">*</span>
+      </label>
+      <div class="choice-group">
+        <label class="choice-opt"><input type="radio" name="newFriends" value="כן"><span class="lbl">כן</span></label>
+        <label class="choice-opt"><input type="radio" name="newFriends" value="לא"><span class="lbl">לא</span></label>
+      </div>
+    </div>
+
+    <div class="err-msg" id="err-5">אנא ענה/י על כל השאלות הנדרשות</div>
+  </div>
+
+  <!-- Step 6: סיכום -->
+  <div class="step" data-step="6">
+    <div class="step-title">
+      <div class="step-num">6</div>
+      סיכום והמלצות
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        מה היית משנה בלוח הזמנים או בניהול השבוע?
+        <span class="opt">(לא חובה)</span>
+      </label>
+      <textarea id="scheduleChanges" placeholder="..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        באיזו מידה תמליץ לתלמידים שנה הבאה ללכת לגדנ"ע? <span class="req">*</span>
+      </label>
+      <div class="rating-row" data-field="recommendRating">
+        <button class="rating-btn" onclick="rate(this,'recommendRating',1)">1</button>
+        <button class="rating-btn" onclick="rate(this,'recommendRating',2)">2</button>
+        <button class="rating-btn" onclick="rate(this,'recommendRating',3)">3</button>
+        <button class="rating-btn" onclick="rate(this,'recommendRating',4)">4</button>
+        <button class="rating-btn" onclick="rate(this,'recommendRating',5)">5</button>
+      </div>
+      <div class="rating-hints"><span>לא ממליץ/ה</span><span>ממליץ/ה בחום</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="question">
+        מסר קצר לתלמידים שיצאו לגדנ"ע בשנה הבאה
+        <span class="opt">(לא חובה)</span>
+      </label>
+      <textarea id="messageForNext" placeholder="..."></textarea>
+    </div>
+
+    <div class="err-msg" id="err-6">אנא ענה/י על כל השאלות הנדרשות</div>
+  </div>
+
+  <!-- Success -->
+  <div class="success" id="successScreen">
+    <div class="ico">🎖️</div>
+    <h2>תודה על המשוב!</h2>
+    <p>התגובה שלך נשמרה בהצלחה.</p>
+    <p class="small">תרומתך לשיפור הגדנ"ע חשובה לנו.</p>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav" id="navBar">
+    <button class="btn btn-prev hidden" id="btnPrev" onclick="prevStep()">הקודם</button>
+    <button class="btn btn-next" id="btnNext" onclick="nextStep()">הבא</button>
+    <button class="btn btn-submit hidden" id="btnSubmit" onclick="submitForm()">שלח דיווח</button>
+  </div>
+
+</div>
+
+<script>
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFDlBHn07-bzcBGhok5pVsrFsQcvwspYEf8DF8toXFzog-qhkerIbNc361-Xij3W2VAg/exec';
+
+  const STEP_LABELS = [
+    'פרטים אישיים',
+    'שביעות רצון כללית',
+    'המפקדים והמשמעת',
+    'תכנים ופעילויות',
+    'תנאים לוגיסטיים',
+    'חברה וגיבוש',
+    'סיכום והמלצות'
+  ];
+
+  let cur = 0;
+  const ratings = {};
+
+  function rate(btn, field, val) {
+    btn.closest('.rating-row').querySelectorAll('.rating-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    ratings[field] = val;
+  }
+
+  function showCond(id, show) {
+    document.getElementById(id).classList.toggle('show', show);
+  }
+
+  function val(id)   { return document.getElementById(id)?.value.trim() || ''; }
+  function radio(nm) { return document.querySelector(`input[name="${nm}"]:checked`)?.value || ''; }
+
+  function validate(step) {
+    let ok = true;
+    if (step === 0) {
+      if (!val('firstName') || !val('lastName') || !document.getElementById('classSelect').value) ok = false;
+    } else if (step === 1) {
+      if (!ratings.overallExperience || !ratings.militaryReadiness) ok = false;
+    } else if (step === 2) {
+      if (!radio('commandAttitude') || !radio('disciplineAdequate')) ok = false;
+    } else if (step === 3) {
+      if (!ratings.theoreticalContent) ok = false;
+    } else if (step === 4) {
+      if (!ratings.foodRating || !ratings.housingRating || !radio('personalNeeds')) ok = false;
+    } else if (step === 5) {
+      if (!ratings.cohesionRating || !radio('newFriends')) ok = false;
+    } else if (step === 6) {
+      if (!ratings.recommendRating) ok = false;
+    }
+    document.getElementById('err-' + step).classList.toggle('show', !ok);
+    return ok;
+  }
+
+  function nextStep() {
+    if (!validate(cur)) return;
+    document.querySelector(`[data-step="${cur}"]`).classList.remove('active');
+    cur++;
+    document.querySelector(`[data-step="${cur}"]`).classList.add('active');
+    refresh();
+    window.scrollTo(0, 0);
+  }
+
+  function prevStep() {
+    document.querySelector(`[data-step="${cur}"]`).classList.remove('active');
+    cur--;
+    document.querySelector(`[data-step="${cur}"]`).classList.add('active');
+    refresh();
+    window.scrollTo(0, 0);
+  }
+
+  function refresh() {
+    const total = STEP_LABELS.length;
+    document.getElementById('progressFill').style.width = ((cur + 1) / total * 100) + '%';
+    document.getElementById('stepLabel').textContent = STEP_LABELS[cur];
+    document.getElementById('stepCounter').textContent = `שלב ${cur + 1} מתוך ${total}`;
+    document.getElementById('btnPrev').classList.toggle('hidden', cur === 0);
+    document.getElementById('btnNext').classList.toggle('hidden', cur === total - 1);
+    document.getElementById('btnSubmit').classList.toggle('hidden', cur !== total - 1);
+  }
+
+  async function submitForm() {
+    if (!validate(cur)) return;
+
+    const btn = document.getElementById('btnSubmit');
+    btn.textContent = 'שולח...';
+    btn.disabled = true;
+
+    const data = new URLSearchParams({
+      timestamp: new Date().toLocaleString('he-IL'),
+      firstName: val('firstName'),
+      lastName: val('lastName'),
+      class: document.getElementById('classSelect').value,
+      overallExperience: ratings.overallExperience || '',
+      militaryReadiness: ratings.militaryReadiness || '',
+      commandAttitude: radio('commandAttitude'),
+      disciplineAdequate: radio('disciplineAdequate'),
+      lessonFromCommander: val('lessonFromCommander'),
+      favoriteActivity: val('favoriteActivity'),
+      theoreticalContent: ratings.theoreticalContent || '',
+      mainDifficulty: val('mainDifficulty'),
+      foodRating: ratings.foodRating || '',
+      housingRating: ratings.housingRating || '',
+      personalNeeds: radio('personalNeeds'),
+      personalNeedsDetails: val('personalNeedsDetails'),
+      cohesionRating: ratings.cohesionRating || '',
+      newFriends: radio('newFriends'),
+      scheduleChanges: val('scheduleChanges'),
+      recommendRating: ratings.recommendRating || '',
+      messageForNext: val('messageForNext'),
+    });
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: data.toString()
+      });
+      showSuccess();
+    } catch {
+      btn.textContent = 'שלח דיווח';
+      btn.disabled = false;
+      alert('שגיאה בשליחה. בדוק/י חיבור לאינטרנט ונסה/י שוב.');
+    }
+  }
+
+  function showSuccess() {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('successScreen').classList.add('show');
+    document.getElementById('navBar').classList.add('hidden');
+    document.getElementById('progressWrap').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
