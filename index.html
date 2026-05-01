@@ -425,15 +425,9 @@
   <div class="step active" data-step="0">
     <div class="step-title">פרטים אישיים</div>
 
-    <div class="two-col">
-      <div class="form-group">
-        <label class="question" for="firstName">שם פרטי <span class="req">*</span></label>
-        <input type="text" id="firstName" placeholder="שם פרטי">
-      </div>
-      <div class="form-group">
-        <label class="question" for="lastName">שם משפחה <span class="req">*</span></label>
-        <input type="text" id="lastName" placeholder="שם משפחה">
-      </div>
+    <div class="form-group">
+      <label class="question" for="fullName">שם מלא <span class="req">*</span></label>
+      <input type="text" id="fullName" placeholder="שם פרטי ושם משפחה">
     </div>
 
     <div class="form-group">
@@ -742,7 +736,7 @@
   function validate(step) {
     let ok = true;
     if (step === 0) {
-      if (!val('firstName') || !val('lastName') || !document.getElementById('classSelect').value) ok = false;
+      if (!val('fullName') || !document.getElementById('classSelect').value) ok = false;
     } else if (step === 1) {
       if (!ratings.overallExperience || !ratings.militaryReadiness) ok = false;
     } else if (step === 2) {
@@ -797,8 +791,8 @@
     const fields = {
       sheetName: 'גדנע',
       timestamp: new Date().toLocaleString('he-IL'),
-      firstName: val('firstName'),
-      lastName: val('lastName'),
+      firstName: val('fullName'),
+      lastName: '',
       class: document.getElementById('classSelect').value,
       overallExperience: ratings.overallExperience || '',
       militaryReadiness: ratings.militaryReadiness || '',
