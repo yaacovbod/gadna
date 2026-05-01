@@ -745,14 +745,14 @@
     document.getElementById('btnSubmit').classList.toggle('hidden', cur !== total - 1);
   }
 
-  async function submitForm() {
+  function submitForm() {
     if (!validate(cur)) return;
 
     const btn = document.getElementById('btnSubmit');
     btn.textContent = 'שולח...';
     btn.disabled = true;
 
-    const data = new URLSearchParams({
+    const data = {
       timestamp: new Date().toLocaleString('he-IL'),
       firstName: val('firstName'),
       lastName: val('lastName'),
@@ -774,21 +774,33 @@
       scheduleChanges: val('scheduleChanges'),
       recommendRating: ratings.recommendRating || '',
       messageForNext: val('messageForNext'),
-    });
+    };
 
-    try {
-      await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: data.toString()
-      });
-      showSuccess();
-    } catch {
+    const cb = '_submit_' + Date.now();
+    const params = new URLSearchParams(data);
+    params.set('callback', cb);
+
+    window[cb] = function(result) {
+      delete window[cb];
+      script.remove();
+      if (result && result.status === 'error') {
+        btn.textContent = 'שלח דיווח';
+        btn.disabled = false;
+        alert('שגיאה: ' + result.message);
+      } else {
+        showSuccess();
+      }
+    };
+
+    const script = document.createElement('script');
+    script.src = APPS_SCRIPT_URL + '?' + params.toString();
+    script.onerror = function() {
+      delete window[cb];
       btn.textContent = 'שלח דיווח';
       btn.disabled = false;
       alert('שגיאה בשליחה. בדוק/י חיבור לאינטרנט ונסה/י שוב.');
-    }
+    };
+    document.head.appendChild(script);
   }
 
   function showSuccess() {
