@@ -331,7 +331,7 @@
     };
 
     const s = document.createElement('script');
-    s.src = APPS_SCRIPT_URL + '?callback=' + cb;
+    s.src = APPS_SCRIPT_URL + '?callback=' + cb + '&sheetName=' + encodeURIComponent('גדנע');
     s.onerror = function() {
       document.getElementById('statusMsg').textContent =
         'שגיאה בטעינה. וודא/י שה-URL מוגדר ושה-Web App פרוס.';
