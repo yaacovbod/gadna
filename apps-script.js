@@ -1,4 +1,7 @@
-var HEADERS = [
+// Apps Script מרכזי לכל שאלוני המשוב
+// כל שאלון שולח sheetName שונה — נתונים נשמרים בגיליון (טאב) נפרד באותו קובץ Sheets
+
+var DEFAULT_HEADERS = [
   'חותמת זמן','שם פרטי','שם משפחה','כיתה',
   'חוויה כללית','מוכנות לשירות',
   'יחס פיקוד','משמעת מותאמת','למידה מהמפקד',
@@ -12,9 +15,10 @@ function doGet(e) {
   e = e || {};
   var p = e.parameter || {};
   var cb = p.callback || '';
+  var sheetName = p.sheetName || 'תגובות';
 
   try {
-    var sheet = getSheet();
+    var sheet = getSheet(sheetName);
     var data = JSON.stringify(sheet.getDataRange().getValues());
     return respond(data, cb);
   } catch (err) {
@@ -25,9 +29,10 @@ function doGet(e) {
 function doPost(e) {
   e = e || {};
   var p = e.parameter || {};
+  var sheetName = p.sheetName || 'תגובות';
 
   try {
-    var sheet = getSheet();
+    var sheet = getSheet(sheetName);
     sheet.appendRow([
       p.timestamp, p.firstName, p.lastName, p['class'],
       p.overallExperience, p.militaryReadiness,
@@ -43,16 +48,15 @@ function doPost(e) {
   }
 }
 
-function getSheet() {
+function getSheet(name) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName('תגובות') || ss.insertSheet('תגובות');
+  var sheet = ss.getSheetByName(name) || ss.insertSheet(name);
 
-  // הוספת כותרות אם השורה הראשונה ריקה או לא מכילה את הכותרת הצפויה
   var firstCell = sheet.getRange(1, 1).getValue();
   if (firstCell !== 'חותמת זמן') {
     sheet.insertRowBefore(1);
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
+    sheet.getRange(1, 1, 1, DEFAULT_HEADERS.length).setValues([DEFAULT_HEADERS]);
+    sheet.getRange(1, 1, 1, DEFAULT_HEADERS.length).setFontWeight('bold');
   }
 
   return sheet;

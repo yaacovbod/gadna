@@ -8,30 +8,26 @@
 - הקובץ `dashboard.html` — דשבורד עם Chart.js, טעינת נתונים דרך JSONP
 - הקובץ `apps-script.js` — קוד Google Apps Script לשמירה ב-Google Sheets
 
+## Apps Script — פרטים טכניים
+- הקובץ `apps-script.js` הוא Apps Script מרכזי המשותף לכל שאלוני המשוב
+- כתובת ה-URL: `https://script.google.com/macros/s/AKfycbyFDlBHn07-bzcBGhok5pVsrFsQcvwspYEf8DF8toXFzog-qhkerIbNc361-Xij3W2VAg/exec`
+- שאלון זה שולח `sheetName: 'גדנע'` — הנתונים נשמרים בגיליון "גדנע" בקובץ Sheets
+- שיטת שליחה: hidden iframe POST (עוקפת CORS בצורה אמינה)
+- שיטת קריאה לדשבורד: JSONP עם פרמטר `callback` ו-`sheetName`
+
 ## עיצוב
 - סגנון צבאי: ירוק כהה (#2D3B1F), קאקי (#8B7355), ירוק עץ (#6B8C3E)
 - רקע הסוואה דרך CSS radial-gradients
 - פונט Heebo
 
-## הגדרת Apps Script (חובה לפני שימוש)
-1. פתח Google Sheet חדש
-2. כלים > Apps Script > הדבק את תוכן `apps-script.js`
-3. פרוס: Deploy > New deployment > Web app
-   - Execute as: Me
-   - Who has access: Anyone
-4. העתק את ה-URL
-5. הדבק את ה-URL בשני הקבצים: `index.html` ו-`dashboard.html`
-   (חפש: `YOUR_APPS_SCRIPT_URL_HERE`)
+## קהל יעד
+תלמידי כיתות יא1–יא6 לאחר שבוע גדנ"ע
 
-## מבנה הנתונים ב-Google Sheets
-עמודות בגיליון "תגובות":
-חותמת זמן, שם פרטי, שם משפחה, כיתה,
+## מבנה הנתונים ב-Google Sheets (גיליון "גדנע")
+עמודות: חותמת זמן, שם פרטי, שם משפחה, כיתה,
 חוויה כללית (1-5), מוכנות לשירות (1-5),
 יחס פיקוד, משמעת מותאמת, למידה מהמפקד,
 פעילות מועדפת, תכנים עיוניים (1-5), קושי מרכזי,
 דירוג אוכל (1-5), דירוג מגורים (1-5), מענה לצרכים, פירוט צרכים,
 גיבוש (1-5), חברים חדשים,
 שינויים מוצעים, המלצה (1-5), מסר לשנה הבאה
-
-## קהל יעד
-תלמידי כיתות יא1–יא6 לאחר שבוע גדנ"ע
