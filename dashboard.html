@@ -260,7 +260,8 @@
 </div>
 
 <script>
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFDlBHn07-bzcBGhok5pVsrFsQcvwspYEf8DF8toXFzog-qhkerIbNc361-Xij3W2VAg/exec';
+  const SHEET_ID  = '18A7WyTSYdkkLvWN38mWW6CdONStqpTDoaaVISMQh-js';
+  const SHEET_GID = '690108593';
 
   /* Column indices (row[0] = headers) */
   const C = {
@@ -318,26 +319,31 @@
   let allRows = [];
   let charts  = {};
 
-  function loadData() {
+  async function loadData() {
     document.getElementById('statusMsg').textContent = 'טוען נתונים...';
     document.getElementById('statusMsg').style.display = 'block';
     document.getElementById('dashboard').style.display = 'none';
 
-    const cb = '_gadnaCb_' + Date.now();
-    window[cb] = function(data) {
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
+      const res  = await fetch(url);
+      const text = await res.text();
+      const data = parseGviz(text);
       allRows = data.slice(1).filter(r => r[C.firstName]);
-      delete window[cb];
       applyFilter();
-    };
-
-    const s = document.createElement('script');
-    s.src = APPS_SCRIPT_URL + '?callback=' + cb + '&sheetName=' + encodeURIComponent('גדנע');
-    s.onerror = function() {
+    } catch (err) {
       document.getElementById('statusMsg').textContent =
-        'שגיאה בטעינה. וודא/י שה-URL מוגדר ושה-Web App פרוס.';
-    };
-    document.head.appendChild(s);
-    setTimeout(() => s.remove && s.remove(), 10000);
+        'שגיאה בטעינה. וודא/י שהגיליון שיתפת עם "כל מי שיש לו קישור".';
+    }
+  }
+
+  function parseGviz(text) {
+    const json = JSON.parse(text.replace(/^[^(]+\(/, '').replace(/\);\s*$/, ''));
+    const headers = json.table.cols.map(c => c.label);
+    const rows = json.table.rows.map(r =>
+      r.c.map(cell => (cell && cell.v !== null && cell.v !== undefined) ? cell.v : '')
+    );
+    return [headers, ...rows];
   }
 
   function applyFilter() {
