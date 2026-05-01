@@ -752,7 +752,7 @@
     btn.textContent = 'שולח...';
     btn.disabled = true;
 
-    const data = {
+    const fields = {
       timestamp: new Date().toLocaleString('he-IL'),
       firstName: val('firstName'),
       lastName: val('lastName'),
@@ -776,31 +776,32 @@
       messageForNext: val('messageForNext'),
     };
 
-    const cb = '_submit_' + Date.now();
-    const params = new URLSearchParams(data);
-    params.set('callback', cb);
+    const iframe = document.createElement('iframe');
+    iframe.name = 'submit-target';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
 
-    window[cb] = function(result) {
-      delete window[cb];
-      script.remove();
-      if (result && result.status === 'error') {
-        btn.textContent = 'שלח דיווח';
-        btn.disabled = false;
-        alert('שגיאה: ' + result.message);
-      } else {
-        showSuccess();
-      }
-    };
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = APPS_SCRIPT_URL;
+    form.target = 'submit-target';
 
-    const script = document.createElement('script');
-    script.src = APPS_SCRIPT_URL + '?' + params.toString();
-    script.onerror = function() {
-      delete window[cb];
-      btn.textContent = 'שלח דיווח';
-      btn.disabled = false;
-      alert('שגיאה בשליחה. בדוק/י חיבור לאינטרנט ונסה/י שוב.');
-    };
-    document.head.appendChild(script);
+    Object.entries(fields).forEach(function([k, v]) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = k;
+      input.value = v;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(function() {
+      showSuccess();
+      form.remove();
+      iframe.remove();
+    }, 2500);
   }
 
   function showSuccess() {
